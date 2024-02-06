@@ -144,8 +144,14 @@ func (r *IsmPolicyReconciler) Reconcile() (retResult ctrl.Result, retErr error) 
 
 	r.osClient, err = util.CreateClientForCluster(r.client, r.ctx, r.cluster, r.osClientTransport)
 	if err != nil {
+		r.logger.Info("opensearch cluster can't be reached, requeueing")
 		reason := "error creating opensearch client"
 		r.recorder.Event(r.instance, "Warning", opensearchError, reason)
+		retResult = ctrl.Result{
+			Requeue:      true,
+			RequeueAfter: 10 * time.Second,
+		}
+		return
 	}
 
 	// If PolicyID not provided explicitly, use metadata.name by default
