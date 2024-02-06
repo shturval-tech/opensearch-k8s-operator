@@ -228,7 +228,7 @@ type Snapshot struct {
 
 type Transition struct {
 	// conditions for the transition.
-	Conditions Condition `json:"conditions"`
+	Conditions *Condition `json:"conditions,omitempty"`
 	// The name of the state to transition to if the conditions are met.
 	StateName string `json:"stateName"`
 }

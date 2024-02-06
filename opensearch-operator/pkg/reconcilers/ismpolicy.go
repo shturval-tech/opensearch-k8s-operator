@@ -307,10 +307,10 @@ func (r *IsmPolicyReconciler) CreateISMPolicyRequest() (*requests.Policy, error)
 	}
 
 	if len(r.instance.Spec.States) > 0 {
-		policy.States = make([]requests.State, 0, len(r.instance.Spec.States))
-		for _, state := range r.instance.Spec.States {
-			actions := make([]requests.Action, 0, len(state.Actions))
-			for _, action := range state.Actions {
+		policy.States = make([]requests.State, len(r.instance.Spec.States))
+		for si, state := range r.instance.Spec.States {
+			actions := make([]requests.Action, len(state.Actions))
+			for i, action := range state.Actions {
 				var replicaCount *requests.ReplicaCount
 				if action.ReplicaCount != nil {
 					replicaCount = &requests.ReplicaCount{
@@ -473,7 +473,7 @@ func (r *IsmPolicyReconciler) CreateISMPolicyRequest() (*requests.Policy, error)
 				if action.ReadOnly != nil {
 					readOnly = action.ReadOnly
 				}
-				actions = append(actions, requests.Action{
+				actions[i] = requests.Action{
 					ReplicaCount:  replicaCount,
 					Retry:         retry,
 					Close:         closea,
@@ -489,31 +489,47 @@ func (r *IsmPolicyReconciler) CreateISMPolicyRequest() (*requests.Policy, error)
 					ReadOnly:      readOnly,
 					ReadWrite:     readWrite,
 					Alias:         alias,
-				})
+				}
 			}
-			transitions := make([]requests.Transition, 0, len(state.Transitions))
-			for _, transition := range state.Transitions {
-				conditions := requests.Condition{}
-				if transition.Conditions.MinDocCount != nil {
-					conditions.MinDocCount = transition.Conditions.MinDocCount
+			transitions := make([]requests.Transition, len(state.Transitions))
+			for i, transition := range state.Transitions {
+				transitions[i] = requests.Transition{StateName: transition.StateName}
+
+				// Set conditions if provided
+				if transition.Conditions != nil {
+					validCondition := false // Check if any condition is set
+
+					conditions := requests.Condition{}
+					if transition.Conditions.MinDocCount != nil {
+						conditions.MinDocCount = transition.Conditions.MinDocCount
+						validCondition = true
+					}
+					if transition.Conditions.MinIndexAge != nil {
+						conditions.MinIndexAge = transition.Conditions.MinIndexAge
+						validCondition = true
+					}
+					if transition.Conditions.MinSize != nil {
+						conditions.MinSize = transition.Conditions.MinSize
+						validCondition = true
+					}
+					if transition.Conditions.MinRolloverAge != nil {
+						conditions.MinRolloverAge = transition.Conditions.MinRolloverAge
+						validCondition = true
+					}
+					if transition.Conditions.Cron != nil {
+						conditions.Cron.Expression = transition.Conditions.Cron.Expression
+						conditions.Cron.Timezone = transition.Conditions.Cron.Timezone
+						validCondition = true
+					}
+
+					// Set conditions if valid
+					if validCondition {
+						transitions[i].Conditions = &conditions
+					}
 				}
-				if transition.Conditions.MinIndexAge != nil {
-					conditions.MinIndexAge = transition.Conditions.MinIndexAge
-				}
-				if transition.Conditions.MinSize != nil {
-					conditions.MinSize = transition.Conditions.MinSize
-				}
-				if transition.Conditions.MinRolloverAge != nil {
-					conditions.MinRolloverAge = transition.Conditions.MinRolloverAge
-				}
-				if transition.Conditions.Cron != nil {
-					conditions.Cron.Expression = transition.Conditions.Cron.Expression
-					conditions.Cron.Timezone = transition.Conditions.Cron.Timezone
-				}
-				statename := transition.StateName
-				transitions = append(transitions, requests.Transition{Conditions: conditions, StateName: statename})
+
 			}
-			policy.States = append(policy.States, requests.State{Actions: actions, Name: state.Name, Transitions: transitions})
+			policy.States[si] = requests.State{Actions: actions, Name: state.Name, Transitions: transitions}
 		}
 	}
 	ismPolicy := requests.Policy{

@@ -401,7 +401,6 @@ spec:
                               the conditions are met.
                             type: string
                         required:
-                        - conditions
                         - stateName
                         type: object
                       type: array
