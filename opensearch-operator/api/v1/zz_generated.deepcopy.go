@@ -1208,10 +1208,12 @@ func (in *OpenSearchISMPolicySpec) DeepCopyInto(out *OpenSearchISMPolicySpec) {
 		*out = new(ErrorNotification)
 		(*in).DeepCopyInto(*out)
 	}
-	if in.ISMTemplate != nil {
-		in, out := &in.ISMTemplate, &out.ISMTemplate
-		*out = new(ISMTemplate)
-		(*in).DeepCopyInto(*out)
+	if in.ISMTemplates != nil {
+		in, out := &in.ISMTemplates, &out.ISMTemplates
+		*out = make([]ISMTemplate, len(*in))
+		for i := range *in {
+			(*in)[i].DeepCopyInto(&(*out)[i])
+		}
 	}
 	if in.States != nil {
 		in, out := &in.States, &out.States

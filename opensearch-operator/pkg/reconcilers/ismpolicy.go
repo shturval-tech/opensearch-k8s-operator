@@ -295,10 +295,15 @@ func (r *IsmPolicyReconciler) CreateISMPolicyRequest() (*requests.Policy, error)
 		}
 	}
 
-	if r.instance.Spec.ISMTemplate != nil {
-		policy.ISMTemplate = &requests.ISMTemplate{}
-		policy.ISMTemplate.IndexPatterns = r.instance.Spec.ISMTemplate.IndexPatterns
-		policy.ISMTemplate.Priority = r.instance.Spec.ISMTemplate.Priority
+	if r.instance.Spec.ISMTemplates != nil && len(r.instance.Spec.ISMTemplates) > 0 {
+		policy.ISMTemplate = []requests.ISMTemplate{}
+
+		for _, ismTemplate := range r.instance.Spec.ISMTemplates {
+			policy.ISMTemplate = append(policy.ISMTemplate, requests.ISMTemplate{
+				IndexPatterns: ismTemplate.IndexPatterns,
+				Priority:      ismTemplate.Priority,
+			})
+		}
 	}
 
 	if len(r.instance.Spec.States) > 0 {

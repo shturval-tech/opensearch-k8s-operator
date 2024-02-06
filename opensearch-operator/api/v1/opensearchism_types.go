@@ -45,9 +45,9 @@ type OpenSearchISMPolicySpec struct {
 	// A human-readable description of the policy.
 	Description       string             `json:"description"`
 	ErrorNotification *ErrorNotification `json:"errorNotification,omitempty"`
-	// Specify an ISM template pattern that matches the index to apply the policy.
-	ISMTemplate *ISMTemplate `json:"ismTemplate,omitempty"`
-	PolicyID    string       `json:"policyId,omitempty"`
+	// Specify an ISM template patterns that matches the index to apply the policy.
+	ISMTemplates []ISMTemplate `json:"ismTemplates,omitempty"`
+	PolicyID     string        `json:"policyId,omitempty"`
 	// The states that you define in the policy.
 	States []State `json:"states"`
 }

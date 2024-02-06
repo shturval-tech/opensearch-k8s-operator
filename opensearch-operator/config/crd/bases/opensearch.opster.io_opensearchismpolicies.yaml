@@ -80,21 +80,23 @@ spec:
                         type: string
                     type: object
                 type: object
-              ismTemplate:
-                description: Specify an ISM template pattern that matches the index
+              ismTemplates:
+                description: Specify an ISM template patterns that matches the index
                   to apply the policy.
-                properties:
-                  indexPatterns:
-                    description: Index patterns on which this policy has to be applied
-                    items:
-                      type: string
-                    type: array
-                  priority:
-                    description: Priority of the template, defaults to 0
-                    type: integer
-                required:
-                - indexPatterns
-                type: object
+                items:
+                  properties:
+                    indexPatterns:
+                      description: Index patterns on which this policy has to be applied
+                      items:
+                        type: string
+                      type: array
+                    priority:
+                      description: Priority of the template, defaults to 0
+                      type: integer
+                  required:
+                  - indexPatterns
+                  type: object
+                type: array
               opensearchCluster:
                 description: LocalObjectReference contains enough information to let
                   you locate the referenced object inside the same namespace.
